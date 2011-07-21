@@ -72,8 +72,21 @@
     if ($(this[0]).is('form')) {
       return validateForm($(this[0]), validators);
     } else {
-      return validateElement($(this[0]), validators[this[0].name]);
+      return validateElement($(this[0]), validators[getValidatorsName(validators, this[0].name)]);
     }
+  };
+
+  var getValidatorsName = function(validators, name) {
+    if (!validators[name]) {
+        var key_regexp = new RegExp(name
+            .replace(/new_\d*/i, '\\d*')
+            .replace(/[\[\]]/g, '\\$&')
+        );
+      for (key in validators) {
+        if (key.match(key_regexp)) return key.match(key_regexp)[0];
+      }
+    }
+    else return name;
   };
 
   var validateForm = function (form, validators) {
