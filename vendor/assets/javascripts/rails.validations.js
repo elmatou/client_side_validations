@@ -30,7 +30,7 @@
         .bind('form:validate:pass',   function (eventData) { clientSideValidations.callbacks.form.pass(  form, eventData); } )
 
         // Set up the events for each validatable form element
-        .find('[data-validate]:input:not(:radio)')
+        .find(':input:not(:radio)')
           .live('focusout',                function ()          { $(this).isValid(settings.validators); })
           .live('change',                  function ()          { $(this).data('changed', true); })
           // Callbacks
@@ -47,7 +47,7 @@
               removeError(element);
             }, eventData); })
         // Checkboxes - Live events don't support filter
-        .end().find('[data-validate]:checkbox')
+        .end().find(':checkbox')
           .live('click', function () { $(this).isValid(settings.validators); })
         // Inputs for confirmations
         .end().find('[id*=_confirmation]').each(function () {
@@ -72,9 +72,18 @@
     if ($(this[0]).is('form')) {
       return validateForm($(this[0]), validators);
     } else {
-      return validateElement($(this[0]), validators[getValidatorsName(validators, this[0].name)]);
+        if ($(this[0]).data('validate') == true) return validateElement($(this[0]), validators[getValidatorsName(validators, this[0].name)]);
+        else return forceValid($(this[0]))
     }
   };
+
+  var forceValid = function(element) {
+    if (element.data('changed') !== false) {
+      element.data('changed', false);
+      element.data('valid', null); element.trigger('element:validate:pass');
+    }
+    return element.data('valid') === false ? false : true;
+  }
 
   var getValidatorsName = function(validators, name) {
     if (!validators[name]) {
